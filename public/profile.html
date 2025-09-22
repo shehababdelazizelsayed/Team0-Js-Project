@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile</title>
+    <link rel="stylesheet" href="profile.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link rel="stylesheet" href="topbar_style.css" />
+  </head>
+  <body>
+    <div class="main-Conatiner">
+      <div class="Top-Bar">
+        <img
+          src="./Assets/logo.jpg"
+          class="logo"
+          alt="Company Logo"
+          onclick="window.location.href='index.html'"
+        />
+
+        <div class="search">
+          <input
+            type="text"
+            name="Search-bar"
+            placeholder="Search..."
+            class="searchbox"
+          />
+          <button type="submit" class="search-icon">
+            <i class="fa fa-search"></i>
+          </button>
+        </div>
+
+        <div class="icon-group">
+          <div class="wrapper profile-wrapper">
+            <button
+              type="button"
+              class="profile-icon"
+              id="profileBtn"
+              aria-label="Profile"
+              title="Profile"
+            >
+              <i class="fa fa-user" style="font-size: 28px"></i>
+            </button>
+            <div class="profile-dropdown" id="profileDropdown">
+              <p class="profile-email">None</p>
+              <br />
+              <a href="profile.html">My Profile</a><br />
+              <button
+                id="logoutBtn"
+                style="
+                  background: none;
+                  border: none;
+                  color: #1c2a33;
+                  cursor: pointer;
+                  padding: 0;
+                  margin: 0;
+                  text-align: center;
+                  width: 100%;
+                "
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="profile-icon"
+            aria-label="Go to cart"
+            title="Cart"
+            id="cartBtn"
+          >
+            <i class="fa fa-shopping-cart" style="font-size: 22px"></i>
+            <span id="cartCount" class="cart-count">0</span>
+          </button>
+        </div>
+
+        <div class="button-container">
+          <div class="wrapper">
+            <button class="contact-btn" id="emailBtn">
+              <i class="fa fa-envelope"></i>
+            </button>
+            <div class="contact-box" id="emailBox">
+              Shehab200088111@gmail.com
+            </div>
+          </div>
+
+          <div class="wrapper">
+            <button class="contact-btn" id="phoneBtn">
+              <i class="fa fa-phone"></i>
+            </button>
+            <div class="contact-box" id="phoneBox">+201023323888</div>
+          </div>
+        </div>
+      </div>
+
+      <h1 class="Header">My Account</h1>
+      <h2 class="Name">Amr</h2>
+
+      <div class="user-info">
+        <input
+          type="text"
+          name="FirstName"
+          class="FirstName"
+          placeholder="First Name"
+          value=""
+        />
+        <input
+          type="text"
+          name="LastName"
+          class="LastName"
+          placeholder="Last Name"
+          value=""
+        />
+        <input
+          type="email"
+          name="Email"
+          class="Email"
+          placeholder="Email"
+          value="amr@example.com"
+        />
+        <input
+          type="tel"
+          name="Phone"
+          class="Phone"
+          placeholder="Phone"
+          value=""
+        />
+        <div style="display: flex; gap: 1rem; flex-direction: column">
+          <button type="submit" name="submit" class="submit">
+            Update Info
+          </button>
+          <button
+            type="button"
+            id="resetPasswordBtn"
+            class="submit"
+            style="background: #ff6b6b"
+          >
+            Reset Password
+          </button>
+        </div>
+      </div>
+
+      <div class="previous-orders">
+        <h3 class="prevv">Previous Orders</h3>
+        <button type="submit" name="vieworders" class="vieworders">
+          View All
+        </button>
+
+        <div class="orders-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Order #</th>
+                <th>Date</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>#1001</td>
+                <td>2025-08-12</td>
+                <td>ASUS ROG Strix B760</td>
+                <td>8600 EGP</td>
+                <td class="completed">Completed</td>
+              </tr>
+              <tr>
+                <td>#1002</td>
+                <td>2025-08-20</td>
+                <td>Intel i7-13700K</td>
+                <td>15000 EGP</td>
+                <td class="pending">Pending</td>
+              </tr>
+              <tr>
+                <td>#1003</td>
+                <td>2025-09-01</td>
+                <td>NVIDIA RTX 4070</td>
+                <td>25000 EGP</td>
+                <td class="shipped">Shipped</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="feet-contact">
+          <ul class="foot-contact">
+            <li class="focus">Contact</li>
+            <li>Email: Shehab200088111@gmail.com</li>
+            <li>Phone number: +201023323888</li>
+          </ul>
+        </div>
+        <div class="feet-tags">
+          <ul class="foot-tags">
+            <li class="focus">Tags</li>
+            <li>Mother board</li>
+            <li>CPU</li>
+            <li>GPU</li>
+            <li>RAM</li>
+            <li>Power supply</li>
+            <li>Hard Drives</li>
+            <li>Accessories</li>
+          </ul>
+        </div>
+        <div class="feet-pages">
+          <ul class="foot-pages">
+            <li class="focus">pages</li>
+            <li><a href="#">Feedback</a></li>
+            <li><a href="#">About</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="Copywrite">&copy; 2025 Team 0. All rights reserved.</div>
+    </div>
+
+    <script src="profile.js"></script>
+    <script src="./topbar_js.js"></script>
+    <script type="module">
+      document.addEventListener("DOMContentLoaded", () => {
+        const logoutBtn = document.getElementById("logoutBtn");
+        if (logoutBtn) {
+          logoutBtn.addEventListener("click", async () => {
+            try {
+              await auth.signOut();
+              window.location.href = "login.html";
+            } catch (err) {
+              console.error("Error signing out:", err);
+            }
+          });
+        }
+
+        document.addEventListener("click", function (event) {
+          if (!event.target.closest(".profile-wrapper")) {
+            document
+              .getElementById("profileDropdown")
+              .classList.remove("active");
+          }
+        });
+      });
+
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
+      import {
+        getFirestore,
+        collection,
+        getDocs,
+        doc,
+        getDoc,
+        setDoc,
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+        sendPasswordResetEmail,
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyD9ghRnC-TMJ-TV6TJxdGH_7qgRsT6Po04",
+        authDomain: "project-d6110.firebaseapp.com",
+        projectId: "project-d6110",
+        storageBucket: "project-d6110.firebasestorage.app",
+        messagingSenderId: "402041654228",
+        appId: "1:402041654228:web:2430f53e2afb775e242441",
+        measurementId: "G-0ZLPYLVJ4Y",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const db = getFirestore(app);
+
+      function updateProfileDropdown(user) {
+        const dropdown = document.getElementById("profileDropdown");
+        if (!dropdown) return;
+        let emailElem = dropdown.querySelector(".profile-email");
+        if (!emailElem) {
+          emailElem = document.createElement("p");
+          emailElem.className = "profile-email";
+          dropdown.prepend(emailElem);
+        }
+        if (user && user.email) {
+          emailElem.textContent = user.email;
+          dropdown.querySelector("a[href='profile.html']").style.display = "";
+          const logoutBtn = dropdown.querySelector("#logoutBtn");
+          if (logoutBtn) logoutBtn.style.display = "";
+          if (dropdown.querySelector(".login-link")) {
+            dropdown.querySelector(".login-link").remove();
+          }
+        } else {
+          emailElem.textContent = "Not logged in";
+          dropdown.querySelector("a[href='profile.html']").style.display =
+            "none";
+          const logoutBtn = dropdown.querySelector("#logoutBtn");
+          if (logoutBtn) logoutBtn.style.display = "none";
+          if (!dropdown.querySelector(".login-link")) {
+            const loginLink = document.createElement("a");
+            loginLink.href = "login.html";
+            loginLink.textContent = "Login";
+            loginLink.className = "login-link";
+            loginLink.style.display = "block";
+            dropdown.appendChild(loginLink);
+          }
+        }
+      }
+
+      const auth = getAuth(app);
+      window.currentUser = null;
+      onAuthStateChanged(auth, async (user) => {
+        window.currentUser = user;
+        updateProfileDropdown(user);
+        if (user) {
+          try {
+            const userRef = doc(db, "users", user.uid);
+            const userSnap = await getDoc(userRef);
+            const emailInput = document.querySelector(".Email");
+            const nameHeader = document.querySelector(".Name");
+            const firstNameInput = document.querySelector(".FirstName");
+            const lastNameInput = document.querySelector(".LastName");
+            const phoneInput = document.querySelector(".Phone");
+
+            if (userSnap && userSnap.exists()) {
+              const data = userSnap.data();
+              if (emailInput) emailInput.value = data.email || user.email || "";
+              if (firstNameInput) firstNameInput.value = data.firstName || "";
+              if (lastNameInput) lastNameInput.value = data.lastName || "";
+              if (phoneInput) phoneInput.value = data.phone || "";
+              if (nameHeader)
+                nameHeader.textContent =
+                  (
+                    (data.firstName || "") +
+                    " " +
+                    (data.lastName || "")
+                  ).trim() ||
+                  user.displayName ||
+                  "Account";
+            } else {
+              let pending = null;
+              try {
+                pending = JSON.parse(
+                  localStorage.getItem("pendingRegisteredUser")
+                );
+              } catch (e) {
+                pending = null;
+              }
+              if (emailInput) emailInput.value = user.email || "";
+              if (firstNameInput)
+                firstNameInput.value =
+                  pending && pending.firstName ? pending.firstName : "";
+              if (lastNameInput)
+                lastNameInput.value =
+                  pending && pending.lastName ? pending.lastName : "";
+              if (phoneInput)
+                phoneInput.value =
+                  pending && pending.phone ? pending.phone : "";
+              if (nameHeader)
+                nameHeader.textContent =
+                  (pending &&
+                    (pending.firstName || "") +
+                      " " +
+                      (pending.lastName || "")) ||
+                  user.displayName ||
+                  "Account";
+            }
+          } catch (err) {
+            console.error("Failed to load profile:", err);
+          }
+        }
+      });
+
+      const submitBtn = document.querySelector(".submit");
+      if (submitBtn) {
+        submitBtn.addEventListener("click", async (e) => {
+          e.preventDefault();
+          if (!window.currentUser) {
+            console.warn("Please sign in to update your profile.");
+            return;
+          }
+          const uid = window.currentUser.uid;
+          const email = (document.querySelector(".Email") || {}).value || "";
+          const firstName =
+            (document.querySelector(".FirstName") || {}).value || "";
+          const lastName =
+            (document.querySelector(".LastName") || {}).value || "";
+          const phone = (document.querySelector(".Phone") || {}).value || "";
+          try {
+            await setDoc(
+              doc(db, "users", uid),
+              { email, firstName, lastName, phone },
+              { merge: true }
+            );
+            const nameHeader = document.querySelector(".Name");
+            if (nameHeader)
+              nameHeader.textContent =
+                ((firstName || "") + " " + (lastName || "")).trim() ||
+                "Account";
+            updateProfileDropdown(auth.currentUser);
+            try {
+              const pending = JSON.parse(
+                localStorage.getItem("pendingRegisteredUser") || "{}"
+              );
+              pending.firstName = firstName;
+              pending.lastName = lastName;
+              pending.phone = phone;
+              localStorage.setItem(
+                "pendingRegisteredUser",
+                JSON.stringify(pending)
+              );
+            } catch (e) {}
+            console.log("Profile updated successfully.");
+          } catch (err) {
+            console.error("Error updating profile:", err);
+            try {
+              const fallback = {
+                email,
+                firstName,
+                lastName,
+                phone,
+                savedAt: new Date().toISOString(),
+              };
+              localStorage.setItem(
+                "pendingProfileSave",
+                JSON.stringify(fallback)
+              );
+            } catch (e) {}
+            console.error(
+              "Failed to update profile to server; changes saved locally."
+            );
+          }
+        });
+      }
+
+      const resetBtn = document.getElementById("resetPasswordBtn");
+      if (resetBtn) {
+        resetBtn.addEventListener("click", async () => {
+          const email = (document.querySelector(".Email") || {}).value || "";
+          if (!email) {
+            console.warn(
+              "Please enter your email address in the Email field first."
+            );
+            return;
+          }
+          try {
+            await sendPasswordResetEmail(auth, email);
+            console.log("Password reset email sent to " + email);
+          } catch (err) {
+            console.error("Failed to send password reset email:", err);
+            console.error("Failed to send reset email:", err.message || err);
+          }
+        });
+      }
+
+      document
+        .getElementById("profileBtn")
+        .addEventListener("click", function (e) {
+          if (!window.currentUser) {
+            window.location.href = "login.html";
+            return;
+          }
+          e.stopPropagation();
+          document.getElementById("profileDropdown").classList.toggle("active");
+        });
+    </script>
+  </body>
+</html>
