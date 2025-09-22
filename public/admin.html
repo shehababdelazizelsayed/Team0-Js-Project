@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="admin.css" />
+  </head>
+  <body>
+    <div class="admin-container">
+      <header>
+        <h1>Admin Panel</h1>
+        <div class="controls">
+          <button id="signOutBtn">go back</button>
+        </div>
+      </header>
+
+      <main>
+        <section class="panel">
+          <h2>Users</h2>
+          <div class="toolbar">
+            <button id="refreshUsers">Refresh</button>
+          </div>
+          <div id="usersList" class="list"></div>
+        </section>
+
+        <section class="panel">
+          <h2>Products</h2>
+          <div class="toolbar">
+            <button id="refreshProducts">Refresh</button>
+            <button id="addProductBtn">Add Product</button>
+          </div>
+          <div id="productsList" class="list"></div>
+        </section>
+      </main>
+
+      <div id="modal" class="modal hidden">
+        <div class="modal-content">
+          <button id="modalClose" class="modal-close">×</button>
+          <div id="modalBody"></div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        getDocs,
+        doc,
+        getDoc,
+        setDoc,
+        addDoc,
+        deleteDoc,
+      } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+      import {
+        getAuth,
+        signOut,
+      } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyD9ghRnC-TMJ-TV6TJxdGH_7qgRsT6Po04",
+        authDomain: "project-d6110.firebaseapp.com",
+        projectId: "project-d6110",
+        storageBucket: "project-d6110.firebasestorage.app",
+        messagingSenderId: "402041654228",
+        appId: "1:402041654228:web:2430f53e2afb775e242441",
+        measurementId: "G-0ZLPYLVJ4Y",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
+
+      const usersList = document.getElementById("usersList");
+      const productsList = document.getElementById("productsList");
+      const modal = document.getElementById("modal");
+      const modalBody = document.getElementById("modalBody");
+      const modalClose = document.getElementById("modalClose");
+      const modalContent = document.querySelector(".modal-content");
+
+      function showModal(html, options = {}) {
+        // options: { narrow: boolean, small: boolean }
+        modalBody.innerHTML = "";
+        if (typeof html === "string") modalBody.innerHTML = html;
+        else modalBody.appendChild(html);
+        if (options.narrow) modalContent.classList.add("narrow");
+        if (options.small) modalContent.classList.add("small");
+        modal.classList.remove("hidden");
+      }
+      function hideModal() {
+        modal.classList.add("hidden");
+        modalBody.innerHTML = "";
+        modalContent.classList.remove("narrow");
+        modalContent.classList.remove("small");
+      }
+      modalClose.addEventListener("click", hideModal);
+
+      // Load initial data (access validation removed intentionally)
+      loadUsers();
+      loadProducts();
+
+      // sign out
+      const signOutBtn = document.getElementById("signOutBtn");
+      if (signOutBtn)
+        signOutBtn.addEventListener("click", async () => {
+          await signOut(auth);
+          window.location.href = "login.html";
+        });
+
+      // USERS
+      async function loadUsers() {
+        usersList.innerHTML =
+          '<div style="padding:.6rem">Loading users...</div>';
+        try {
+          const q = await getDocs(collection(db, "users"));
+          usersList.innerHTML = "";
+          q.forEach((docSnap) => {
+            const data = docSnap.data();
+            const id = docSnap.id;
+            const item = document.createElement("div");
+            item.className = "item";
+            const meta = document.createElement("div");
+            meta.className = "meta";
+            meta.innerHTML = `<strong>${escapeHtml(
+              (data.firstName || "") + " " + (data.lastName || "")
+            )}</strong><div style="font-size:.9rem;color:#555">${escapeHtml(
+              data.email || ""
+            )}</div>`;
+            const actions = document.createElement("div");
+            actions.className = "actions";
+            const view = document.createElement("button");
+            view.className = "btn view";
+            view.textContent = "View";
+            view.addEventListener("click", () => openViewDoc("users", id));
+            const edit = document.createElement("button");
+            edit.className = "btn edit";
+            edit.textContent = "Edit";
+            edit.addEventListener("click", () => openEditDoc("users", id));
+            const del = document.createElement("button");
+            del.className = "btn delete";
+            del.textContent = "Delete";
+            del.addEventListener("click", () => deleteUser(id));
+            actions.appendChild(view);
+            actions.appendChild(edit);
+            actions.appendChild(del);
+            item.appendChild(meta);
+            item.appendChild(actions);
+            usersList.appendChild(item);
+          });
+        } catch (e) {
+          usersList.innerHTML =
+            '<div style="padding:.6rem;color:red">Failed to load users</div>';
+          console.error(e);
+        }
+      }
+
+      // Generic view/edit/create functions for documents (show all fields)
+      async function openViewDoc(collectionName, id) {
+        try {
+          const ref = doc(db, collectionName, id);
+          const snap = await getDoc(ref);
+          const data = snap.exists() ? snap.data() : {};
+          const pre = document.createElement("pre");
+          pre.textContent = JSON.stringify(data, null, 2);
+          // Build a small container with a Close button for the view modal
+          const container = document.createElement("div");
+          const btn = document.createElement("button");
+          btn.className = "btn";
+          btn.style.marginBottom = "0.5rem";
+          btn.textContent = "Close";
+          btn.addEventListener("click", hideModal);
+          container.appendChild(btn);
+          container.appendChild(pre);
+          showModal(container, { narrow: true });
+        } catch (e) {
+          console.error("Failed to load document", e);
+        }
+      }
+
+      function buildFieldRow(key, value) {
+        const row = document.createElement("div");
+        row.className = "form-row";
+        const label = document.createElement("label");
+        label.textContent = key;
+        const input = document.createElement("input");
+        input.className = "fld-kv";
+        // store values as JSON if non-string
+        if (typeof value === "object") input.value = JSON.stringify(value);
+        else
+          input.value =
+            value === undefined || value === null ? "" : String(value);
+        const remove = document.createElement("button");
+        remove.className = "btn";
+        remove.textContent = "Remove";
+        remove.addEventListener("click", () => row.remove());
+        row.appendChild(label);
+        row.appendChild(input);
+        row.appendChild(remove);
+        // attach a data-key attr
+        row.dataset.key = key;
+        return row;
+      }
+
+      async function openEditDoc(collectionName, id) {
+        try {
+          const ref = doc(db, collectionName, id);
+          const snap = await getDoc(ref);
+          const data = snap.exists() ? snap.data() : {};
+          const container = document.createElement("div");
+          container.innerHTML = `<h3>Edit ${escapeHtml(
+            collectionName
+          )} (${escapeHtml(id)})</h3>`;
+          const fields = document.createElement("div");
+          fields.className = "fields-list";
+          for (const k of Object.keys(data)) {
+            fields.appendChild(buildFieldRow(k, data[k]));
+          }
+          // add new field inputs
+          const addRow = document.createElement("div");
+          addRow.className = "form-row";
+          addRow.innerHTML = `<input class="new-key" placeholder="field name"><input class="new-val" placeholder="value"><button class="btn">Add field</button>`;
+          addRow.querySelector("button").addEventListener("click", () => {
+            const key = addRow.querySelector(".new-key").value.trim();
+            const val = addRow.querySelector(".new-val").value;
+            if (!key) {
+              console.warn("Field name required");
+              return;
+            }
+            fields.appendChild(buildFieldRow(key, tryParse(val)));
+            addRow.querySelector(".new-key").value = "";
+            addRow.querySelector(".new-val").value = "";
+          });
+
+          const footer = document.createElement("div");
+          footer.style.display = "flex";
+          footer.style.justifyContent = "flex-end";
+          footer.style.gap = ".5rem";
+          const saveBtn = document.createElement("button");
+          saveBtn.className = "btn edit";
+          saveBtn.textContent = "Save";
+          const cancelBtn = document.createElement("button");
+          cancelBtn.className = "btn";
+          cancelBtn.textContent = "Cancel";
+          footer.appendChild(saveBtn);
+          footer.appendChild(cancelBtn);
+
+          container.appendChild(fields);
+          container.appendChild(addRow);
+          container.appendChild(footer);
+          showModal(container, { narrow: true });
+
+          cancelBtn.addEventListener("click", hideModal);
+          saveBtn.addEventListener("click", async () => {
+            const rows = fields.querySelectorAll(".form-row");
+            const payload = {};
+            rows.forEach((r) => {
+              const k =
+                r.dataset.key || r.querySelector("label")?.textContent || "";
+              const v = r.querySelector(".fld-kv")
+                ? r.querySelector(".fld-kv").value
+                : r.querySelector("input")?.value;
+              if (!k) return;
+              payload[k] = tryParse(v);
+            });
+            try {
+              await setDoc(ref, payload, { merge: true });
+              hideModal();
+              if (collectionName === "users") loadUsers();
+              else loadProducts();
+            } catch (e) {
+              console.error("Failed to save", e);
+            }
+          });
+        } catch (e) {
+          console.error("Failed to open document", e);
+        }
+      }
+
+      function tryParse(v) {
+        if (v === "") return "";
+        try {
+          return JSON.parse(v);
+        } catch (e) {
+          return v;
+        }
+      }
+
+      async function openCreateDoc(collectionName) {
+        const container = document.createElement("div");
+        container.innerHTML = `<h3>Create ${escapeHtml(collectionName)}</h3>`;
+        const fields = document.createElement("div");
+        fields.className = "fields-list";
+        const addRow = document.createElement("div");
+        addRow.className = "form-row";
+        addRow.innerHTML = `<input class="new-key" placeholder="field name"><input class="new-val" placeholder="value"><button class="btn">Add field</button>`;
+        addRow.querySelector("button").addEventListener("click", () => {
+          const key = addRow.querySelector(".new-key").value.trim();
+          const val = addRow.querySelector(".new-val").value;
+          if (!key) {
+            console.warn("Field name required");
+            return;
+          }
+          const row = buildFieldRow(key, tryParse(val));
+          row.dataset.key = key;
+          fields.appendChild(row);
+          addRow.querySelector(".new-key").value = "";
+          addRow.querySelector(".new-val").value = "";
+        });
+        const footer = document.createElement("div");
+        footer.style.display = "flex";
+        footer.style.justifyContent = "flex-end";
+        footer.style.gap = ".5rem";
+        const createBtn = document.createElement("button");
+        createBtn.className = "btn edit";
+        createBtn.textContent = "Create";
+        const cancelBtn = document.createElement("button");
+        cancelBtn.className = "btn";
+        cancelBtn.textContent = "Cancel";
+        footer.appendChild(createBtn);
+        footer.appendChild(cancelBtn);
+        container.appendChild(fields);
+        container.appendChild(addRow);
+        container.appendChild(footer);
+        showModal(container, { narrow: true });
+        cancelBtn.addEventListener("click", hideModal);
+        createBtn.addEventListener("click", async () => {
+          const rows = fields.querySelectorAll(".form-row");
+          const payload = {};
+          rows.forEach((r) => {
+            const k =
+              r.dataset.key || r.querySelector("label")?.textContent || "";
+            const v = r.querySelector(".fld-kv")
+              ? r.querySelector(".fld-kv").value
+              : r.querySelector("input")?.value;
+            if (!k) return;
+            payload[k] = tryParse(v);
+          });
+          try {
+            await addDoc(collection(db, collectionName), payload);
+            hideModal();
+            if (collectionName === "users") loadUsers();
+            else loadProducts();
+          } catch (e) {
+            console.error("Failed to create doc", e);
+          }
+        });
+      }
+
+      async function openEditUser(id) {
+        try {
+          const uref = doc(db, "users", id);
+          const snap = await getDoc(uref);
+          const data = snap.exists() ? snap.data() : {};
+          const form = document.createElement("div");
+          form.innerHTML = `
+      <h3>Edit User</h3>
+      <div class="form-row"><label>Email</label><input class="fld-email" value="${escapeHtml(
+        data.email || ""
+      )}"></div>
+      <div class="form-row"><label>First Name</label><input class="fld-first" value="${escapeHtml(
+        data.firstName || ""
+      )}"></div>
+      <div class="form-row"><label>Last Name</label><input class="fld-last" value="${escapeHtml(
+        data.lastName || ""
+      )}"></div>
+      <div style="display:flex;gap:.5rem;justify-content:flex-end"><button id="saveUserBtn" class="btn edit">Save</button><button id="cancelUserBtn" class="btn">Cancel</button></div>
+    `;
+          showModal(form, { narrow: true });
+          document
+            .getElementById("cancelUserBtn")
+            .addEventListener("click", hideModal);
+          document
+            .getElementById("saveUserBtn")
+            .addEventListener("click", async () => {
+              const email = form.querySelector(".fld-email").value;
+              const firstName = form.querySelector(".fld-first").value;
+              const lastName = form.querySelector(".fld-last").value;
+              await setDoc(
+                uref,
+                { email, firstName, lastName },
+                { merge: true }
+              );
+              hideModal();
+              loadUsers();
+            });
+        } catch (e) {
+          console.error("Failed to open user", e);
+        }
+      }
+
+      async function deleteUser(id) {
+        if (!confirm("Delete this user?")) return;
+        try {
+          await deleteDoc(doc(db, "users", id));
+          loadUsers();
+        } catch (e) {
+          console.error("Failed to delete user", e);
+        }
+      }
+
+      // add user
+      const addUserBtn = document.getElementById("addUserBtn");
+      if (addUserBtn)
+        addUserBtn.addEventListener("click", () => openCreateDoc("users"));
+
+      // PRODUCTS
+      async function loadProducts() {
+        productsList.innerHTML =
+          '<div style="padding:.6rem">Loading products...</div>';
+        try {
+          const q = await getDocs(collection(db, "products"));
+          productsList.innerHTML = "";
+          q.forEach((docSnap) => {
+            const data = docSnap.data();
+            const id = docSnap.id;
+            const item = document.createElement("div");
+            item.className = "item";
+            const meta = document.createElement("div");
+            meta.className = "meta";
+            // Build a compact key/value preview for products so all fields are visible
+            const lines = [];
+            for (const k of Object.keys(data)) {
+              const v = data[k];
+              lines.push(
+                `<span class="kv-key">${escapeHtml(
+                  k
+                )}:</span> <span class="kv-val">${escapeHtml(String(v))}</span>`
+              );
+            }
+            meta.innerHTML = `<div style="font-weight:600;margin-bottom:.25rem">${escapeHtml(
+              data.title || id
+            )}</div><div class="kv-preview" style="font-size:.9rem;color:#555">${lines.join(
+              "<br>"
+            )}</div>`;
+            const actions = document.createElement("div");
+            actions.className = "actions";
+            const view = document.createElement("button");
+            view.className = "btn view";
+            view.textContent = "View";
+            view.addEventListener("click", () => openViewDoc("products", id));
+            const edit = document.createElement("button");
+            edit.className = "btn edit";
+            edit.textContent = "Edit";
+            edit.addEventListener("click", () => openEditDoc("products", id));
+            const del = document.createElement("button");
+            del.className = "btn delete";
+            del.textContent = "Delete";
+            del.addEventListener("click", () => deleteProduct(id));
+            actions.appendChild(view);
+            actions.appendChild(edit);
+            actions.appendChild(del);
+            item.appendChild(meta);
+            item.appendChild(actions);
+            productsList.appendChild(item);
+          });
+        } catch (e) {
+          productsList.innerHTML =
+            '<div style="padding:.6rem;color:red">Failed to load products</div>';
+          console.error(e);
+        }
+      }
+
+      async function openEditProduct(id) {
+        try {
+          const pref = doc(db, "products", id);
+          const snap = await getDoc(pref);
+          const data = snap.exists() ? snap.data() : {};
+          const form = document.createElement("div");
+          form.innerHTML = `
+      <h3>Edit Product</h3>
+      <div class="form-row"><label>Title</label><input class="fld-title" value="${escapeHtml(
+        data.title || ""
+      )}"></div>
+      <div class="form-row"><label>Price</label><input class="fld-price" value="${escapeHtml(
+        data.price || ""
+      )}"></div>
+      <div class="form-row"><label>Description</label><textarea class="fld-desc">${escapeHtml(
+        data.description || ""
+      )}</textarea></div>
+      <div style="display:flex;gap:.5rem;justify-content:flex-end"><button id="saveProductBtn" class="btn edit">Save</button><button id="cancelProductBtn" class="btn">Cancel</button></div>
+    `;
+          showModal(form, { small: true });
+          document
+            .getElementById("cancelProductBtn")
+            .addEventListener("click", hideModal);
+          document
+            .getElementById("saveProductBtn")
+            .addEventListener("click", async () => {
+              const title = form.querySelector(".fld-title").value;
+              const price = form.querySelector(".fld-price").value;
+              const description = form.querySelector(".fld-desc").value;
+              await setDoc(
+                pref,
+                { title, price, description },
+                { merge: true }
+              );
+              hideModal();
+              loadProducts();
+            });
+        } catch (e) {
+          console.error("Failed to open product", e);
+        }
+      }
+
+      async function deleteProduct(id) {
+        if (!confirm("Delete this product?")) return;
+        try {
+          await deleteDoc(doc(db, "products", id));
+          loadProducts();
+        } catch (e) {
+          console.error("Failed to delete product", e);
+        }
+      }
+
+      const addProductBtn = document.getElementById("addProductBtn");
+      if (addProductBtn)
+        addProductBtn.addEventListener("click", () => openAddProduct());
+
+      // Better Add Product modal with common product fields
+      async function openAddProduct() {
+        const container = document.createElement("div");
+        container.innerHTML = `<h3>Add Product</h3>`;
+        const form = document.createElement("div");
+        form.className = "fields-list";
+        // fields: title, name, band, brand, cate, image, instack (checkbox), instock, model, price
+        const rows = [
+          ["Name", "name"],
+          ["Brand", "brand"],
+          ["Category", "cate"],
+          ["Image", "image"],
+          ["In Stock (flag)", "instack"],
+          ["Model", "model"],
+          ["Price", "price"],
+        ];
+        rows.forEach(([label, key]) => {
+          const r = document.createElement("div");
+          r.className = "form-row";
+          if (key === "instack") {
+            r.innerHTML = `<label>${label}</label><select class="fld-${key}"><option value="true">true</option><option value="false">false</option></select>`;
+          } else if (key === "price") {
+            r.innerHTML = `<label>${label}</label><input class="fld-${key}" type="number" step="0.01">`;
+          } else {
+            r.innerHTML = `<label>${label}</label><input class="fld-${key}">`;
+          }
+          form.appendChild(r);
+        });
+        const footer = document.createElement("div");
+        footer.style.display = "flex";
+        footer.style.justifyContent = "flex-end";
+        footer.style.gap = ".5rem";
+        const createBtn = document.createElement("button");
+        createBtn.className = "btn edit";
+        createBtn.textContent = "Create";
+        const cancelBtn = document.createElement("button");
+        cancelBtn.className = "btn";
+        cancelBtn.textContent = "Cancel";
+        footer.appendChild(createBtn);
+        footer.appendChild(cancelBtn);
+        container.appendChild(form);
+        container.appendChild(footer);
+        showModal(container, { narrow: true });
+        cancelBtn.addEventListener("click", hideModal);
+        createBtn.addEventListener("click", async () => {
+          try {
+            const payload = {};
+            rows.forEach(([label, key]) => {
+              const el = document.querySelector(`.fld-${key}`);
+              if (!el) return;
+              let val = el.value;
+              if (key === "instack") val = val === "true";
+              if (key === "price") val = val === "" ? null : Number(val);
+              if (val !== null && val !== undefined && val !== "")
+                payload[key] = val;
+            });
+            await addDoc(collection(db, "products"), payload);
+            hideModal();
+            loadProducts();
+          } catch (e) {
+            console.error("Failed to create product", e);
+          }
+        });
+      }
+
+      // helpers
+      function escapeHtml(s) {
+        if (!s) return "";
+        return String(s).replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            }[c])
+        );
+      }
+
+      // refresh buttons
+      const refreshUsers = document.getElementById("refreshUsers");
+      if (refreshUsers) refreshUsers.addEventListener("click", loadUsers);
+      const refreshProducts = document.getElementById("refreshProducts");
+      if (refreshProducts)
+        refreshProducts.addEventListener("click", loadProducts);
+
+      // initial
+      // note: onAuthStateChanged triggers loading when authorised
+    </script>
+  </body>
+</html>
