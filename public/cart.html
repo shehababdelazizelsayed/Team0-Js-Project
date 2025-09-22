@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cart</title>
+    <link rel="stylesheet" href="cart.css" />
+    <link rel="stylesheet" href="Ai.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link rel="stylesheet" href="topbar_style.css" />
+  </head>
+  <body>
+    <div class="main-Conatiner">
+      <div class="Top-Bar">
+        <img
+          src="./Assets/logo.jpg"
+          class="logo"
+          alt="Company Logo"
+          onclick="window.location.href='index.html'"
+        />
+
+        <div class="search">
+          <input
+            type="text"
+            name="Search-bar"
+            placeholder="Search..."
+            class="searchbox"
+          />
+          <button type="submit" class="search-icon">
+            <i class="fa fa-search"></i>
+          </button>
+        </div>
+
+        <div class="icon-group">
+          <div class="wrapper profile-wrapper">
+            <button
+              type="button"
+              class="profile-icon"
+              id="profileBtn"
+              aria-label="Profile"
+              title="Profile"
+            >
+              <i class="fa fa-user" style="font-size: 28px"></i>
+            </button>
+            <div class="profile-dropdown" id="profileDropdown">
+              <p class="profile-email">None</p>
+              <br />
+              <a href="profile.html">My Profile</a><br />
+              <button
+                id="logoutBtn"
+                style="
+                  background: none;
+                  border: none;
+                  color: #1c2a33;
+                  cursor: pointer;
+                  padding: 0;
+                  margin: 0;
+                  text-align: center;
+                  width: 100%;
+                "
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="profile-icon"
+            aria-label="Go to cart"
+            title="Cart"
+            id="cartBtn"
+          >
+            <i class="fa fa-shopping-cart" style="font-size: 22px"></i>
+            <span id="cartCount" class="cart-count">0</span>
+          </button>
+        </div>
+
+        <div class="button-container">
+          <div class="wrapper">
+            <button class="contact-btn" id="emailBtn">
+              <i class="fa fa-envelope"></i>
+            </button>
+            <div class="contact-box" id="emailBox">
+              Shehab200088111@gmail.com
+            </div>
+          </div>
+
+          <div class="wrapper">
+            <button class="contact-btn" id="phoneBtn">
+              <i class="fa fa-phone"></i>
+            </button>
+            <div class="contact-box" id="phoneBox">+201023323888</div>
+          </div>
+        </div>
+      </div>
+
+      <h1 class="Header">Cart</h1>
+
+      <div class="cart-container">
+        <div class="order-steps">
+          <div class="step">1<br /><span>Place Order</span></div>
+          <div class="arrow">→</div>
+          <div class="step">2<br /><span>Confirm Order</span></div>
+          <div class="arrow">→</div>
+          <div class="step">3<br /><span>Checkout & Deliver</span></div>
+        </div>
+
+        <div class="cart-content">
+          <table class="cart-table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Product Name</th>
+                <th>Model</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Total Price</th>
+              </tr>
+            </thead>
+            <tbody id="cartTableBody"></tbody>
+          </table>
+
+          <div class="cart-sidebar">
+            <div class="discount-box">
+              <h3>Discount</h3>
+              <input type="text" placeholder="Voucher code" />
+              <button>Check Voucher</button>
+            </div>
+
+            <div class="checkout-box">
+              <h3>Checkout</h3>
+              <p>Full Total Price: <span>$630</span></p>
+              <p>Discount: <span>$0</span></p>
+              <p>
+                <strong>Final Total: <span>$630</span></strong>
+              </p>
+              <button
+                class="checkout-btn"
+                onclick="window.location.href='checkout.html'"
+              >
+                Checkout
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="chat-button" id="chatButton" onclick="toggleChat()">
+        <span id="chatIcon">💬</span>
+      </button>
+
+      <div class="chat-container" id="chatContainer">
+        <div class="cc-box">
+          <div class="cc-box-header clearfix">
+            AI Assistant
+            <span class="status-indicator status-loading" id="statusIndicator"
+              >Loading...</span
+            >
+            <span class="pull-right" title="Close" onclick="closeChat()">
+              ✕
+            </span>
+          </div>
+
+          <div class="cc-tab-container">
+            <div class="cc-tab selected">CHAT</div>
+          </div>
+
+          <div class="cc-search-bar">
+            <input
+              class="search-input"
+              type="text"
+              placeholder="Search messages..."
+              onkeyup="searchMessages()"
+            />
+          </div>
+
+          <div class="content-area">
+            <div class="chat-messages" id="chatMessages">
+              <div class="message ai">
+                Hello! I'm your AI assistant. I'm loading your product catalog
+                now...
+              </div>
+            </div>
+
+            <div class="input-area">
+              <input
+                class="chat-input"
+                type="text"
+                id="question"
+                placeholder="Loading products..."
+                disabled
+                onkeypress="handleKeyPress(event)"
+              />
+              <button class="send-btn" id="sendBtn" onclick="ask()" disabled>
+                Send
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="feet-contact">
+          <ul class="foot-contact">
+            <li class="focus">Contact</li>
+            <li>Email: Shehab200088111@gmail.com</li>
+            <li>Phone number: +201023323888</li>
+          </ul>
+        </div>
+        <div class="feet-tags">
+          <ul class="foot-tags">
+            <li class="focus">Tags</li>
+            <li>Mother board</li>
+            <li>CPU</li>
+            <li>GPU</li>
+            <li>RAM</li>
+            <li>Power supply</li>
+            <li>Hard Drives</li>
+            <li>Accessories</li>
+          </ul>
+        </div>
+        <div class="feet-pages">
+          <ul class="foot-pages">
+            <li class="focus">pages</li>
+            <li><a href="#">Feedback</a></li>
+            <li><a href="#">About</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="Copywrite">&copy; 2025 Team 0. All rights reserved.</div>
+    </div>
+    <script src="./cart.js"></script>
+    <script src="./topbar_js.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
+      import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyD9ghRnC-TMJ-TV6TJxdGH_7qgRsT6Po04",
+        authDomain: "project-d6110.firebaseapp.com",
+        projectId: "project-d6110",
+        storageBucket: "project-d6110.firebasestorage.app",
+        messagingSenderId: "402041654228",
+        appId: "1:402041654228:web:2430f53e2afb775e242441",
+        measurementId: "G-0ZLPYLVJ4Y",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
+
+      function updateProfileDropdown(user) {
+        const dropdown = document.getElementById("profileDropdown");
+        if (!dropdown) return;
+        let emailElem = dropdown.querySelector(".profile-email");
+        if (!emailElem) {
+          emailElem = document.createElement("p");
+          emailElem.className = "profile-email";
+          dropdown.prepend(emailElem);
+        }
+
+        if (user && user.email) {
+          emailElem.textContent = user.email;
+          dropdown.querySelector("a[href='profile.html']").style.display = "";
+          const logoutBtn = dropdown.querySelector("#logoutBtn");
+          if (logoutBtn) logoutBtn.style.display = "";
+          if (dropdown.querySelector(".login-link")) {
+            dropdown.querySelector(".login-link").remove();
+          }
+        } else {
+          emailElem.textContent = "";
+          dropdown.querySelector("a[href='profile.html']").style.display =
+            "none";
+          const logoutBtn = dropdown.querySelector("#logoutBtn");
+          if (logoutBtn) logoutBtn.style.display = "none";
+          if (!dropdown.querySelector(".login-link")) {
+            const loginLink = document.createElement("a");
+            loginLink.href = "login.html";
+            loginLink.textContent = "Login";
+            loginLink.className = "login-link";
+            loginLink.style.display = "block";
+            dropdown.appendChild(loginLink);
+          }
+        }
+      }
+
+      onAuthStateChanged(auth, (user) => {
+        window.currentUser = user;
+        updateProfileDropdown(user);
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const logoutBtn = document.getElementById("logoutBtn");
+        if (logoutBtn) {
+          logoutBtn.addEventListener("click", async () => {
+            try {
+              await auth.signOut();
+              window.location.href = "login.html";
+            } catch (err) {
+              console.error("Error signing out:", err);
+            }
+          });
+        }
+
+        document
+          .getElementById("profileBtn")
+          .addEventListener("click", function (e) {
+            if (!window.currentUser) {
+              window.location.href = "login.html";
+              return;
+            }
+            e.stopPropagation();
+            document
+              .getElementById("profileDropdown")
+              .classList.toggle("active");
+          });
+
+        document.addEventListener("click", function (event) {
+          if (!event.target.closest(".profile-wrapper")) {
+            document
+              .getElementById("profileDropdown")
+              .classList.remove("active");
+          }
+        });
+
+        function getCart() {
+          return JSON.parse(localStorage.getItem("cart")) || [];
+        }
+
+        function saveCart(cart) {
+          localStorage.setItem("cart", JSON.stringify(cart));
+        }
+
+        function renderCart() {
+          const cart = getCart();
+          const tbody = document.getElementById("cartTableBody");
+          tbody.innerHTML = "";
+          let fullTotal = 0;
+
+          cart.forEach((item, index) => {
+            const totalPrice = item.price * item.quantity;
+            fullTotal += totalPrice;
+
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td><img src="${item.image}" alt="${item.name}" width="60"/></td>
+              <td>${item.name}</td>
+              <td>${item.brand || "-"}</td>
+              <td>
+                <div class="quantity-control">
+                  <button class="decrease">-</button>
+                  <input type="text" value="${item.quantity}" readonly />
+                  <button class="increase">+</button>
+                  <button class="delete-btn">Delete</button>
+                </div>
+              </td>
+              <td>${item.price} EGP</td>
+              <td>${totalPrice} EGP</td>
+            `;
+
+            row.querySelector(".decrease").addEventListener("click", () => {
+              if (item.quantity > 1) {
+                item.quantity--;
+              } else {
+                cart.splice(index, 1);
+              }
+              saveCart(cart);
+              renderCart();
+            });
+
+            row.querySelector(".increase").addEventListener("click", () => {
+              item.quantity++;
+              saveCart(cart);
+              renderCart();
+            });
+
+            row.querySelector(".delete-btn").addEventListener("click", () => {
+              cart.splice(index, 1);
+              saveCart(cart);
+              renderCart();
+            });
+
+            tbody.appendChild(row);
+          });
+
+          const totalBox = document.querySelector(".checkout-box");
+          if (totalBox) {
+            totalBox.querySelector("p span").textContent = `${fullTotal} EGP`;
+            totalBox.querySelector(
+              "strong span"
+            ).textContent = `${fullTotal} EGP`;
+            localStorage.setItem("finalTotal", fullTotal);
+          }
+
+          if (typeof updateCartCount === "function") {
+            updateCartCount();
+          }
+        }
+
+        renderCart();
+      });
+    </script>
+    <script src="Ai.js"></script>
+  </body>
+</html>
