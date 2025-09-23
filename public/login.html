@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <link rel="stylesheet" href="login.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link rel="stylesheet" href="topbar_style.css" />
+  </head>
+  <body>
+    <div class="main-Conatiner">
+      <div class="Top-Bar">
+        <img
+          src="./Assets/logo.jpg"
+          class="logo"
+          alt="Company Logo"
+          onclick="window.location.href='index.html'"
+        />
+
+        <div class="search">
+          <input
+            type="text"
+            name="Search-bar"
+            placeholder="Search..."
+            class="searchbox"
+          />
+          <button type="submit" class="search-icon">
+            <i class="fa fa-search"></i>
+          </button>
+        </div>
+
+        <div class="icon-group">
+          <div class="wrapper profile-wrapper">
+            <button
+              type="button"
+              class="profile-icon"
+              id="profileBtn"
+              aria-label="Profile"
+              title="Profile"
+            >
+              <i class="fa fa-user" style="font-size: 28px"></i>
+            </button>
+            <div class="profile-dropdown" id="profileDropdown">
+              <p class="profile-email">None</p>
+              <br />
+              <a href="profile.html">My Profile</a><br />
+              <button
+                id="logoutBtn"
+                style="
+                  background: none;
+                  border: none;
+                  color: #1c2a33;
+                  cursor: pointer;
+                  padding: 0;
+                  margin: 0;
+                  text-align: center;
+                  width: 100%;
+                "
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="profile-icon"
+            aria-label="Go to cart"
+            title="Cart"
+            id="cartBtn"
+          >
+            <i class="fa fa-shopping-cart" style="font-size: 22px"></i>
+            <span id="cartCount" class="cart-count">0</span>
+          </button>
+        </div>
+
+        <div class="button-container">
+          <div class="wrapper">
+            <button class="contact-btn" id="emailBtn">
+              <i class="fa fa-envelope"></i>
+            </button>
+            <div class="contact-box" id="emailBox">
+              Shehab200088111@gmail.com
+            </div>
+          </div>
+
+          <div class="wrapper">
+            <button class="contact-btn" id="phoneBtn">
+              <i class="fa fa-phone"></i>
+            </button>
+            <div class="contact-box" id="phoneBox">+201023323888</div>
+          </div>
+        </div>
+      </div>
+
+      <h1 class="Header">Login Form</h1>
+
+      <div class="login-container">
+        <div class="login-box">
+          <h2>Already have an account</h2>
+          <input type="text" placeholder="Email" class="Username" />
+          <input type="password" placeholder="Password" class="Password" />
+          <a href="#" class="forgot">Forgot password?</a>
+          <button class="login-btn">Login</button>
+        </div>
+
+        <div class="register-box">
+          <h2>New customer</h2>
+          <p class="small-text">Create your account and enjoy shopping</p>
+          <button class="register-btn" id="registerPageBtn">Register</button>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="feet-contact">
+          <ul class="foot-contact">
+            <li class="focus">Contact</li>
+            <li>Email: Shehab200088111@gmail.com</li>
+            <li>Phone number: +201023323888</li>
+          </ul>
+        </div>
+        <div class="feet-tags">
+          <ul class="foot-tags">
+            <li class="focus">Tags</li>
+            <li>Mother board</li>
+            <li>CPU</li>
+            <li>GPU</li>
+            <li>RAM</li>
+            <li>Power supply</li>
+            <li>Hard Drives</li>
+            <li>Accessories</li>
+          </ul>
+        </div>
+        <div class="feet-pages">
+          <ul class="foot-pages">
+            <li class="focus">Pages</li>
+            <li><a href="#">Feedback</a></li>
+            <li><a href="#">About</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="Copywrite">&copy; 2025 Team 0. All rights reserved.</div>
+    </div>
+
+    <script src="login.js"></script>
+    <script src="./topbar_js.js"></script>
+    <script>
+      const register = document.querySelector(".register-btn");
+      if (register) {
+        register.addEventListener("click", () => {
+          window.location.href = "register.html";
+        });
+      }
+    </script>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+      import {
+        getAuth,
+        signInWithEmailAndPassword,
+        onAuthStateChanged,
+        sendPasswordResetEmail,
+        signOut,
+      } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+      import {
+        getFirestore,
+        collection,
+        getDocs,
+      } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-analytics.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyD9ghRnC-TMJ-TV6TJxdGH_7qgRsT6Po04",
+        authDomain: "project-d6110.firebaseapp.com",
+        projectId: "project-d6110",
+        storageBucket: "project-d6110.firebasestorage.app",
+        messagingSenderId: "402041654228",
+        appId: "1:402041654228:web:2430f53e2afb775e242441",
+        measurementId: "G-0ZLPYLVJ4Y",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
+
+      function updateProfileDropdown(user) {
+        const dropdown = document.getElementById("profileDropdown");
+        if (!dropdown) return;
+
+        let emailElem = dropdown.querySelector(".profile-email");
+        if (!emailElem) {
+          emailElem = document.createElement("p");
+          emailElem.className = "profile-email";
+          dropdown.prepend(emailElem);
+        }
+
+        if (user && user.email) {
+          emailElem.textContent = user.email;
+          dropdown.querySelector("a[href='profile.html']").style.display = "";
+          const logoutBtn = dropdown.querySelector("#logoutBtn");
+          if (logoutBtn) logoutBtn.style.display = "";
+          if (dropdown.querySelector(".login-link")) {
+            dropdown.querySelector(".login-link").remove();
+          }
+        } else {
+          emailElem.textContent = "Not logged in";
+          dropdown.querySelector("a[href='profile.html']").style.display =
+            "none";
+          const logoutBtn = dropdown.querySelector("#logoutBtn");
+          if (logoutBtn) logoutBtn.style.display = "none";
+          if (!dropdown.querySelector(".login-link")) {
+            const loginLink = document.createElement("a");
+            loginLink.href = "login.html";
+            loginLink.textContent = "Login";
+            loginLink.className = "login-link";
+            loginLink.style.display = "block";
+            dropdown.appendChild(loginLink);
+          }
+        }
+      }
+
+      window.currentUser = null;
+      onAuthStateChanged(auth, (user) => {
+        window.currentUser = user;
+        updateProfileDropdown(user);
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const logoutBtn = document.getElementById("logoutBtn");
+        if (logoutBtn) {
+          logoutBtn.addEventListener("click", async () => {
+            try {
+              await signOut(auth);
+              window.location.href = "login.html";
+            } catch (err) {
+              console.error("Error signing out:", err);
+            }
+          });
+        }
+
+        document.addEventListener("click", function (event) {
+          if (!event.target.closest(".profile-wrapper")) {
+            const dd = document.getElementById("profileDropdown");
+            if (dd) dd.classList.remove("active");
+          }
+        });
+
+        const profileBtn = document.getElementById("profileBtn");
+        if (profileBtn) {
+          profileBtn.addEventListener("click", function (e) {
+            if (!window.currentUser) {
+              window.location.href = "login.html";
+              return;
+            }
+            e.stopPropagation();
+            document
+              .getElementById("profileDropdown")
+              .classList.toggle("active");
+          });
+        }
+      });
+
+      const loginBtn = document.querySelector(".login-btn");
+      const emailInput = document.querySelector(".Username");
+      const passwordInput = document.querySelector(".Password");
+      const forgotLink = document.querySelector(".forgot");
+
+      if (loginBtn && emailInput && passwordInput) {
+        loginBtn.addEventListener("click", async () => {
+          const email = emailInput.value.trim();
+          const password = passwordInput.value;
+
+          if (!email || !password) {
+            return;
+          }
+
+          try {
+            const userCredential = await signInWithEmailAndPassword(
+              auth,
+              email,
+              password
+            );
+            window.location.href = "index.html";
+          } catch (error) {
+            alert("Invalid email or password. Please try again.");
+          }
+        });
+      }
+
+      if (forgotLink && emailInput) {
+        forgotLink.addEventListener("click", async (e) => {
+          e.preventDefault();
+          const email = emailInput.value.trim();
+          if (!email) {
+            return;
+          }
+          try {
+            await sendPasswordResetEmail(auth, email);
+          } catch (error) {}
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,159 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  background-color: #f4f4f4;
+  color: #1c2a33;
+}
+
+.main-Conatiner {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+
+
+.Header {
+  border-bottom: 1px solid #3fa7a7;
+  margin: 0 1em 1em;
+  padding: 0.5em 0.7em;
+  font-size: 2.2em;
+  color: #293f4d;
+}
+.register-container {
+  display: flex;
+  justify-content: center;
+  margin: 2em;
+}
+
+.register-form {
+  background: white;
+  padding: 2em;
+  border-radius: 0.7em;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2em;
+}
+
+.register-form fieldset {
+  border: 1px solid #3fa7a7;
+  border-radius: 0.7em;
+  padding: 1.5em;
+}
+
+.register-form legend {
+  font-weight: bold;
+  color: #293f4d;
+  padding: 0 0.5em;
+}
+
+.register-form input[type="text"],
+.register-form input[type="email"],
+.register-form input[type="tel"],
+.register-form input[type="password"] {
+  width: 100%;
+  padding: 1em;
+  margin: 0.7em 0;
+  border-radius: 0.5em;
+  border: 1px solid #ccc;
+  background-color: #f4f4f4;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.register-form input:focus {
+  border-color: #ff6b6b;
+  box-shadow: 0 0 8px rgba(255, 107, 107, 0.4);
+}
+
+.radio-group {
+  display: flex;
+  gap: 2em;
+  margin-top: 1em;
+}
+
+.terms {
+  display: flex;
+  align-items: center;
+}
+
+.terms label {
+  font-size: 0.95em;
+}
+
+.register-btn {
+  width: 100%;
+  padding: 1em;
+  border: none;
+  border-radius: 0.5em;
+  font-weight: bold;
+  color: white;
+  background-color: #3fa7a7;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.register-btn:hover {
+  background-color: #ff6b6b;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  background-color: #293f4d;
+  color: #f4f4f4;
+  padding: 3em 4em;
+  flex-wrap: wrap;
+  gap: 2em;
+  margin-top: auto;
+}
+
+.footer ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer li {
+  margin-bottom: 0.8em;
+  transition: color 0.3s;
+}
+
+.footer li:hover {
+  color: #3fa7a7;
+}
+
+.footer .focus {
+  font-size: 1.3em;
+  font-weight: bold;
+  color: #ff6b6b;
+  margin-bottom: 1em;
+}
+
+.footer a {
+  color: #f4f4f4;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.footer a:hover {
+  color: #3fa7a7;
+}
+
+.Copywrite {
+  text-align: center;
+  background-color: #1c2a33;
+  color: #f4f4f4;
+  padding: 1.2em 0;
+  font-size: 0.9em;
+  border-top: 1px solid #3fa7a7;
+}

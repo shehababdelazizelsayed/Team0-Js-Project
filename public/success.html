@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Successful</title>
+    <link rel="stylesheet" href="checkout.css" />
+    <style>
+      .success-box {
+        text-align: center;
+        padding: 50px;
+      }
+
+      .success-box h1 {
+        color: green;
+      }
+
+      .success-box a {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 10px 20px;
+        background: #28a745;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 8px;
+      }
+
+      .success-box a:hover {
+        background: #218838;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container success-box">
+      <h1>✅ Payment Successful!</h1>
+      <p>
+        Thank you for your purchase. Your order has been placed successfully.
+      </p>
+      <a href="index.html">Continue Shopping</a>
+    </div>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        addDoc,
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyD9ghRnC-TMJ-TV6TJxdGH_7qgRsT6Po04",
+        authDomain: "project-d6110.firebaseapp.com",
+        projectId: "project-d6110",
+        storageBucket: "project-d6110.firebasestorage.app",
+        messagingSenderId: "402041654228",
+        appId: "1:402041654228:web:2430f53e2afb775e242441",
+        measurementId: "G-0ZLPYLVJ4Y",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
+
+      async function saveOrderToFirebase(user) {
+        const cartItems = JSON.parse(localStorage.getItem("cart")) || [];
+        if (cartItems.length === 0) return;
+
+        try {
+          const order = {
+            userEmail: user.email,
+            orderDate: new Date().toISOString(),
+            products: cartItems,
+            orderTotal: cartItems.reduce(
+              (total, item) => total + item.price * item.quantity,
+              0
+            ),
+            status: "completed",
+          };
+
+          const docRef = await addDoc(collection(db, "orders"), order);
+          console.log("Order saved with ID: ", docRef.id);
+
+          localStorage.removeItem("cart");
+        } catch (error) {
+          console.error("Error saving order:", error);
+        }
+      }
+
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          console.log("User is logged in:", user.email);
+          saveOrderToFirebase(user);
+        } else {
+          console.log("No user logged in");
+        }
+      });
+    </script>
+  </body>
+</html>

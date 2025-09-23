@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cart</title>
+    <link rel="stylesheet" href="category.css" />
+    <link rel="stylesheet" href="Ai.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link rel="stylesheet" href="topbar_style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="main-Conatiner">
+      <div class="Top-Bar">
+        <img
+          src="./Assets/logo.jpg"
+          class="logo"
+          alt="Company Logo"
+          onclick="window.location.href='index.html'"
+        />
+
+        <div class="search">
+          <input
+            type="text"
+            name="Search-bar"
+            placeholder="Search..."
+            class="searchbox"
+          />
+          <button type="submit" class="search-icon">
+            <i class="fa fa-search"></i>
+          </button>
+        </div>
+
+        <div class="icon-group">
+          <div class="wrapper profile-wrapper">
+            <button
+              type="button"
+              class="profile-icon"
+              id="profileBtn"
+              aria-label="Profile"
+              title="Profile"
+            >
+              <i class="fa fa-user" style="font-size: 28px"></i>
+            </button>
+            <div class="profile-dropdown" id="profileDropdown">
+              <p class="profile-email">None</p>
+              <br />
+              <a href="profile.html">My Profile</a><br />
+              <button id="logoutBtn">Logout</button>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="profile-icon"
+            aria-label="Go to cart"
+            title="Cart"
+            id="cartBtn"
+          >
+            <i class="fa fa-shopping-cart" style="font-size: 22px"></i>
+            <span id="cartCount" class="cart-count">0</span>
+          </button>
+        </div>
+
+        <div class="button-container">
+          <div class="wrapper">
+            <button class="contact-btn" id="emailBtn">
+              <i class="fa fa-envelope"></i>
+            </button>
+            <div class="contact-box" id="emailBox">
+              Shehab200088111@gmail.com
+            </div>
+          </div>
+
+          <div class="wrapper">
+            <button class="contact-btn" id="phoneBtn">
+              <i class="fa fa-phone"></i>
+            </button>
+            <div class="contact-box" id="phoneBox">+201023323888</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="category-headerz">
+        <h1 class="Header">Category</h1>
+        <h2 class="Name">All Products</h2>
+      </div>
+
+      <div class="category-layout">
+        <aside id="filters">
+          <form>
+            <button type="reset" class="reset-btn">Reset</button>
+            <div class="filter-card price">
+              <h4>Price</h4>
+              <div class="arrows">
+                <i class="fa-solid fa-caret-up"></i>
+                <i class="fa-solid fa-caret-down"></i>
+              </div>
+              <div>
+                <input type="number" name="min-price" placeholder="Min" />
+                - <input type="number" name="max-price" placeholder="Max" />
+              </div>
+            </div>
+            <div class="filter-card">
+              <h4>Types</h4>
+              <div class="arrows">
+                <i class="fa-solid fa-caret-up"></i>
+                <i class="fa-solid fa-caret-down"></i>
+              </div>
+              <div>
+                <input type="radio" id="processor" name="type" />
+                <label for="processor">CPU</label>
+              </div>
+              <div>
+                <input type="radio" id="gpu" name="type" />
+                <label for="gpu">GPU</label>
+              </div>
+              <div>
+                <input type="radio" id="mother board" name="type" />
+                <label for="mother board">Motherboard</label>
+              </div>
+              <div>
+                <input type="radio" id="ram" name="type" />
+                <label for="ram">RAM</label>
+              </div>
+              <div>
+                <input type="radio" id="ssd" name="type" />
+                <label for="ssd">Storage</label>
+              </div>
+              <div>
+                <input type="radio" id="power supply" name="type" />
+                <label for="power supply">Power Supply</label>
+              </div>
+              <div>
+                <input type="radio" id="cases" name="type" />
+                <label for="cases">Case</label>
+              </div>
+              <div>
+                <input type="radio" id="fans & coolers" name="type" />
+                <label for="fans & coolers">Cooling</label>
+              </div>
+              <div>
+                <input type="radio" id="accessories" name="type" />
+                <label for="accessories">Accessories</label>
+              </div>
+            </div>
+            <div class="filter-card">
+              <h4>Brands</h4>
+              <div class="arrows">
+                <i class="fa-solid fa-caret-up"></i>
+                <i class="fa-solid fa-caret-down"></i>
+              </div>
+              <div>
+                <input type="checkbox" id="intel" name="brand" />
+                <label for="intel">Intel</label>
+              </div>
+              <div>
+                <input type="checkbox" id="amd" name="brand" />
+                <label for="amd">AMD</label>
+              </div>
+              <div>
+                <input type="checkbox" id="nvidia" name="brand" />
+                <label for="nvidia">NVIDIA</label>
+              </div>
+              <div>
+                <input type="checkbox" id="asus" name="brand" />
+                <label for="asus">ASUS</label>
+              </div>
+              <div>
+                <input type="checkbox" id="msi" name="brand" />
+                <label for="msi">MSI</label>
+              </div>
+              <div>
+                <input type="checkbox" id="gigabyte" name="brand" />
+                <label for="gigabyte">Gigabyte</label>
+              </div>
+              <div>
+                <input type="checkbox" id="corsair" name="brand" />
+                <label for="corsair">Corsair</label>
+              </div>
+              <div>
+                <input type="checkbox" id="coolermaster" name="brand" />
+                <label for="coolermaster">Cooler Master</label>
+              </div>
+              <div>
+                <input type="checkbox" id="thermaltake" name="brand" />
+                <label for="thermaltake">Thermaltake</label>
+              </div>
+              <div>
+                <input type="checkbox" id="seagate" name="brand" />
+                <label for="seagate">Seagate</label>
+              </div>
+              <div>
+                <input type="checkbox" id="wd" name="brand" />
+                <label for="wd">Western Digital</label>
+              </div>
+              <div>
+                <input type="checkbox" id="samsung" name="brand" />
+                <label for="samsung">Samsung</label>
+              </div>
+              <div>
+                <input type="checkbox" id="kingston" name="brand" />
+                <label for="kingston">Kingston</label>
+              </div>
+              <div>
+                <input type="checkbox" id="gskill" name="brand" />
+                <label for="gskill">G.Skill</label>
+              </div>
+              <div>
+                <input type="checkbox" id="adata" name="brand" />
+                <label for="adata">ADATA</label>
+              </div>
+            </div>
+          </form>
+        </aside>
+
+        <main class="products">
+          <h3 class="products-title">Products Cards</h3>
+
+          <div class="cards-grid"></div>
+        </main>
+      </div>
+      <button class="chat-button" id="chatButton" onclick="toggleChat()">
+        <span id="chatIcon">💬</span>
+      </button>
+
+      <div class="chat-container" id="chatContainer">
+        <div class="cc-box">
+          <div class="cc-box-header clearfix">
+            AI Assistant
+            <span class="status-indicator status-loading" id="statusIndicator"
+              >Loading...</span
+            >
+            <span class="pull-right" title="Close" onclick="closeChat()">
+              ✕
+            </span>
+          </div>
+
+          <div class="cc-tab-container">
+            <div class="cc-tab selected">CHAT</div>
+          </div>
+
+          <div class="cc-search-bar">
+            <input
+              class="search-input"
+              type="text"
+              placeholder="Search messages..."
+              onkeyup="searchMessages()"
+            />
+          </div>
+
+          <div class="content-area">
+            <div class="chat-messages" id="chatMessages">
+              <div class="message ai">
+                Hello! I'm your AI assistant. I'm loading your product catalog
+                now...
+              </div>
+            </div>
+
+            <div class="input-area">
+              <input
+                class="chat-input"
+                type="text"
+                id="question"
+                placeholder="Loading products..."
+                disabled
+                onkeypress="handleKeyPress(event)"
+              />
+              <button class="send-btn" id="sendBtn" onclick="ask()" disabled>
+                Send
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="feet-contact">
+          <ul class="foot-contact">
+            <li class="focus">Contact</li>
+            <li>Email: Shehab200088111@gmail.com</li>
+            <li>Phone number: +201023323888</li>
+          </ul>
+        </div>
+        <div class="feet-tags">
+          <ul class="foot-tags">
+            <li class="focus">Tags</li>
+            <li>Mother board</li>
+            <li>CPU</li>
+            <li>GPU</li>
+            <li>RAM</li>
+            <li>Power supply</li>
+            <li>Hard Drives</li>
+            <li>Accessories</li>
+          </ul>
+        </div>
+        <div class="feet-pages">
+          <ul class="foot-pages">
+            <li class="focus">pages</li>
+            <li><a href="#">Feedback</a></li>
+            <li><a href="#">About</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="Copywrite">&copy; 2025 Team 0. All rights reserved.</div>
+    </div>
+
+    <script src="category.js"></script>
+    <script src="topbar_js.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
+      import {
+        getFirestore,
+        collection,
+        getDocs,
+        doc,
+        getDoc,
+        setDoc,
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+        signOut,
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+      // Firebase config
+      const firebaseConfig = {
+        apiKey: "AIzaSyD9ghRnC-TMJ-TV6TJxdGH_7qgRsT6Po04",
+        authDomain: "project-d6110.firebaseapp.com",
+        projectId: "project-d6110",
+        storageBucket: "project-d6110.firebasestorage.app",
+        messagingSenderId: "402041654228",
+        appId: "1:402041654228:web:2430f53e2afb775e242441",
+        measurementId: "G-0ZLPYLVJ4Y",
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
+      window.currentUser = null;
+
+      let allProducts = [];
+      let currentSearchQuery = "";
+
+      // ---------------------------
+      // CART FUNCTION
+      // ---------------------------
+      async function addToCart(product) {
+        // Step 1: Update localStorage
+        let cart = JSON.parse(localStorage.getItem("cart")) || [];
+        const existing = cart.find((item) => item.id === product.id);
+        if (existing) {
+          existing.quantity += 1;
+        } else {
+          cart.push({
+            id: product.id,
+            name: product.Name || product.name,
+            brand: product.brand || "",
+            price: product.price || 0,
+            image: product.image || "./Assets/placeholder.jpg",
+            quantity: 1,
+          });
+        }
+        localStorage.setItem("cart", JSON.stringify(cart));
+
+        // Step 2: Update Firestore if user is logged in
+        if (window.currentUser) {
+          const userRef = doc(db, "users", window.currentUser.uid);
+          try {
+            const userSnap = await getDoc(userRef);
+            let userCart = [];
+            if (userSnap.exists() && userSnap.data().cart) {
+              userCart = userSnap.data().cart;
+            }
+
+            const existingItem = userCart.find(
+              (item) => item.id === product.id
+            );
+            if (existingItem) {
+              existingItem.quantity += 1;
+            } else {
+              userCart.push({
+                id: product.id,
+                name: product.Name || product.name,
+                brand: product.brand || "",
+                price: product.price || 0,
+                image: product.image || "./Assets/placeholder.jpg",
+                quantity: 1,
+              });
+            }
+            document.getElementById("cartCount").textContent = cart.reduce(
+              (sum, item) => sum + item.quantity,
+              0
+            );
+            await setDoc(userRef, { cart: userCart }, { merge: true });
+            console.log("✅ Cart updated in Firestore!");
+          } catch (err) {
+            console.error("❌ Error saving cart to Firestore:", err);
+          }
+        }
+      }
+
+      // ---------------------------
+      // PRODUCT CARD CREATION
+      // ---------------------------
+      function createProductCard(product) {
+        const card = document.createElement("div");
+        card.classList.add("product-card");
+        card.innerHTML = `
+      <div class="image-wrap">
+        <img src="${product.image || "./Assets/placeholder.jpg"}" alt="${
+          product.Name || product.name
+        }" />
+      </div>
+      <div class="meta">
+        <span class="brand">${product.brand || "Unknown"}</span>
+        <span class="availability ${
+          product.availability?.toLowerCase() || "in"
+        }">
+          ${product.availability || "In stock"}
+        </span>
+      </div>
+      <div class="description">${product.Name || product.name}</div>
+      <div class="price">${
+        product.price ? product.price.toLocaleString() : ""
+      } EGP</div>
+      <div class="card-actions">
+        <button class="btn add-to-cart">Add to cart</button>
+        <button class="btn btn-secondary" onclick="window.location.href='./product.html?id=${
+          product.id
+        }'">View product</button>
+      </div>`;
+
+        // Attach cart handler
+        card.querySelector(".add-to-cart").addEventListener("click", () => {
+          addToCart(product);
+        });
+
+        return card;
+      }
+
+      // ---------------------------
+      // RENDER + FILTERS
+      // ---------------------------
+      function renderProducts(products) {
+        const grid = document.querySelector(".cards-grid");
+        grid.innerHTML = "";
+        if (products.length === 0) {
+          grid.innerHTML = "<p>No products found.</p>";
+          return;
+        }
+        products.forEach((product) => {
+          const card = createProductCard(product);
+          grid.appendChild(card);
+        });
+      }
+
+      function applyFilters() {
+        const minPrice = parseFloat(
+          document.querySelector("input[name='min-price']").value
+        );
+        const maxPrice = parseFloat(
+          document.querySelector("input[name='max-price']").value
+        );
+        const type = document.querySelector("input[name='type']:checked")?.id;
+        const brands = [
+          ...document.querySelectorAll("input[name='brand']:checked"),
+        ].map((el) => el.id.toLowerCase());
+
+        let filtered = [...allProducts];
+
+        const q = (currentSearchQuery || "").trim().toLowerCase();
+        if (q) {
+          filtered = filtered.filter((p) => {
+            const name = (p.Name || p.name || "").toLowerCase();
+            const brand = (p.brand || "").toLowerCase();
+            const cate = (p.cate || p.category || "").toLowerCase();
+            const desc = (p.description || "").toLowerCase();
+            return (
+              name.includes(q) ||
+              brand.includes(q) ||
+              cate.includes(q) ||
+              desc.includes(q)
+            );
+          });
+        }
+
+        if (!isNaN(minPrice))
+          filtered = filtered.filter((p) => p.price >= minPrice);
+        if (!isNaN(maxPrice))
+          filtered = filtered.filter((p) => p.price <= maxPrice);
+        if (type)
+          filtered = filtered.filter(
+            (p) => p.cate?.toLowerCase() === type.toLowerCase()
+          );
+        if (brands.length > 0)
+          filtered = filtered.filter((p) =>
+            brands.includes(p.brand?.toLowerCase())
+          );
+
+        renderProducts(filtered);
+      }
+
+      async function loadProducts() {
+        try {
+          const querySnapshot = await getDocs(collection(db, "products"));
+          allProducts = [];
+          querySnapshot.forEach((docSnap) => {
+            allProducts.push({ id: docSnap.id, ...docSnap.data() });
+          });
+          renderProducts(allProducts);
+        } catch (error) {
+          console.error("Error loading products:", error);
+        }
+      }
+
+      // ---------------------------
+      // PROFILE DROPDOWN
+      // ---------------------------
+      function updateProfileDropdown(user) {
+        const dropdown = document.getElementById("profileDropdown");
+        if (!dropdown) return;
+        let emailElem = dropdown.querySelector(".profile-email");
+        if (!emailElem) {
+          emailElem = document.createElement("p");
+          emailElem.className = "profile-email";
+          dropdown.prepend(emailElem);
+        }
+
+        if (user && user.email) {
+          emailElem.textContent = user.email;
+          dropdown.querySelector("a[href='profile.html']").style.display = "";
+          const logoutBtn = dropdown.querySelector("#logoutBtn");
+          if (logoutBtn) logoutBtn.style.display = "";
+          if (dropdown.querySelector(".login-link")) {
+            dropdown.querySelector(".login-link").remove();
+          }
+        } else {
+          emailElem.textContent = "Not logged in";
+          dropdown.querySelector("a[href='profile.html']").style.display =
+            "none";
+          const logoutBtn = dropdown.querySelector("#logoutBtn");
+          if (logoutBtn) logoutBtn.style.display = "none";
+          if (!dropdown.querySelector(".login-link")) {
+            const loginLink = document.createElement("a");
+            loginLink.href = "login.html";
+            loginLink.textContent = "Login";
+            loginLink.className = "login-link";
+            loginLink.style.display = "block";
+            dropdown.appendChild(loginLink);
+          }
+        }
+      }
+
+      onAuthStateChanged(auth, (user) => {
+        window.currentUser = user;
+        updateProfileDropdown(user);
+      });
+
+      function setupProfileDropdown() {
+        const profileBtn = document.getElementById("profileBtn");
+        const profileDropdown = document.getElementById("profileDropdown");
+
+        if (profileBtn && profileDropdown) {
+          profileBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (!window.currentUser) {
+              window.location.href = "login.html";
+              return;
+            }
+            profileDropdown.classList.toggle("active");
+          });
+
+          document.addEventListener("click", (event) => {
+            if (!event.target.closest(".profile-wrapper")) {
+              profileDropdown.classList.remove("active");
+            }
+          });
+
+          const logoutBtn = document.getElementById("logoutBtn");
+          if (logoutBtn) {
+            logoutBtn.addEventListener("click", async () => {
+              try {
+                await signOut(auth);
+                window.location.href = "login.html";
+              } catch (err) {
+                console.error("Error signing out:", err);
+              }
+            });
+          }
+        }
+      }
+
+      // ---------------------------
+      // INIT
+      // ---------------------------
+      document.addEventListener("DOMContentLoaded", () => {
+        setupProfileDropdown();
+        loadProducts().then(() => {
+          applyFilters();
+        });
+      });
+    </script>
+
+    <script src="Ai.js"></script>
+  </body>
+</html>
