@@ -395,3 +395,28 @@ body {
   background-color: #ff6b6b;
   transform: translateY(-2px);
 }
+
+/* Stock status styles */
+.stock-status {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.stock-status .in-stock {
+  color: #28a745;
+}
+
+.stock-status .out-of-stock {
+  color: #dc3545;
+}
+
+.cli-addcart:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.cli-addcart:disabled:hover {
+  background-color: #6c757d;
+}

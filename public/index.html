@@ -471,9 +471,16 @@
       <div class="price">${
         product.price ? product.price.toLocaleString() : ""
       } EGP</div>
+      <div class="stock-status">${
+        (product.stockQuantity || 0) > 0 
+          ? `<span class="in-stock">In Stock (${product.stockQuantity})</span>` 
+          : '<span class="out-of-stock">Out of Stock</span>'
+      }</div>
       <div class="actions-row">
         <div class="add-tocart">
-          <button class="cli-addcart">Add to cart</button>
+          <button class="cli-addcart" ${(product.stockQuantity || 0) <= 0 ? 'disabled' : ''}>${
+            (product.stockQuantity || 0) > 0 ? 'Add to cart' : 'Out of Stock'
+          }</button>
         </div>
         <div class="view-product">
           <button class="cli-view">View product</button>
@@ -484,9 +491,23 @@
         // --- ADD TO CART BUTTON ---
         const addBtn = card.querySelector(".cli-addcart");
         addBtn.addEventListener("click", async () => {
-          let cart = getCart();
+          // Check stock availability
+          const currentStock = product.stockQuantity || 0;
+          if (currentStock <= 0) {
+            alert("This product is out of stock!");
+            return;
+          }
 
+          let cart = getCart();
           const existing = cart.find((item) => item.id === product.id);
+          
+          // Check if adding this item would exceed stock
+          const currentCartQuantity = existing ? existing.quantity : 0;
+          if (currentCartQuantity >= currentStock) {
+            alert(`Only ${currentStock} items available in stock!`);
+            return;
+          }
+
           if (existing) {
             existing.quantity += 1;
           } else {

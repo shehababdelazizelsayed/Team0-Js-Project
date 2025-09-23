@@ -34,6 +34,24 @@ document.addEventListener("click", function (e) {
     
     if (btn.textContent === "+") {
       const input = btn.parentElement.querySelector("input");
+      const row = btn.closest("tr");
+      const productId = row.getAttribute("data-product-id");
+      
+      // Check stock availability before increasing quantity
+      if (productId) {
+        // Get current cart to check stock limits
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
+        const cartItem = cart.find(item => item.id === productId);
+        
+        if (cartItem && cartItem.maxStock) {
+          const currentQty = parseInt(input.value);
+          if (currentQty >= cartItem.maxStock) {
+            alert(`Only ${cartItem.maxStock} items available in stock!`);
+            return;
+          }
+        }
+      }
+      
       input.value = parseInt(input.value) + 1;
       updateCartTotals();
     }

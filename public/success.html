@@ -45,6 +45,9 @@
         getFirestore,
         collection,
         addDoc,
+        doc,
+        getDoc,
+        updateDoc,
       } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
       import {
         getAuth,
@@ -65,11 +68,37 @@
       const db = getFirestore(app);
       const auth = getAuth(app);
 
+      async function updateStockQuantities(cartItems) {
+        try {
+          for (const item of cartItems) {
+            const productRef = doc(db, "products", item.id);
+            const productSnap = await getDoc(productRef);
+            
+            if (productSnap.exists()) {
+              const productData = productSnap.data();
+              const currentStock = productData.stockQuantity || 0;
+              const newStock = Math.max(0, currentStock - item.quantity);
+              
+              await updateDoc(productRef, {
+                stockQuantity: newStock
+              });
+              
+              console.log(`Updated stock for ${item.name}: ${currentStock} -> ${newStock}`);
+            }
+          }
+        } catch (error) {
+          console.error("Error updating stock quantities:", error);
+        }
+      }
+
       async function saveOrderToFirebase(user) {
         const cartItems = JSON.parse(localStorage.getItem("cart")) || [];
         if (cartItems.length === 0) return;
 
         try {
+          // First update stock quantities
+          await updateStockQuantities(cartItems);
+
           const order = {
             userEmail: user.email,
             orderDate: new Date().toISOString(),

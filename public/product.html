@@ -276,26 +276,12 @@
             ".summary .price-row:nth-child(2) .value.ok"
           );
           if (inStockElem) {
-            let inStock = product.instock;
-            if (inStock === undefined) inStock = product.instack;
-            if (typeof inStock === "boolean") {
-              inStockElem.textContent = inStock ? "Yes" : "No";
-              inStockElem.classList.toggle("ok", inStock);
-              inStockElem.classList.toggle("no", !inStock);
-            } else if (typeof inStock === "string") {
-              inStockElem.textContent =
-                inStock.toLowerCase() === "true" ? "Yes" : "No";
-              inStockElem.classList.toggle(
-                "ok",
-                inStock.toLowerCase() === "true"
-              );
-              inStockElem.classList.toggle(
-                "no",
-                inStock.toLowerCase() !== "true"
-              );
-            } else {
-              inStockElem.textContent = inStock ? "Yes" : "No";
-            }
+            const stockQuantity = product.stockQuantity || 0;
+            const isInStock = stockQuantity > 0;
+            
+            inStockElem.textContent = isInStock ? `Yes (${stockQuantity} available)` : "No";
+            inStockElem.classList.toggle("ok", isInStock);
+            inStockElem.classList.toggle("no", !isInStock);
           }
 
           const brandElem = document.querySelector(
@@ -470,8 +456,24 @@
             const productSnap = await getDoc(productRef);
             if (!productSnap.exists()) return;
             const product = productSnap.data();
+            
+            // Check stock availability
+            const currentStock = product.stockQuantity || 0;
+            if (currentStock <= 0) {
+              alert("This product is out of stock!");
+              return;
+            }
+
             let cart = JSON.parse(localStorage.getItem("cart")) || [];
             const existing = cart.find((item) => item.id === productId);
+            
+            // Check if adding this item would exceed stock
+            const currentCartQuantity = existing ? existing.quantity : 0;
+            if (currentCartQuantity >= currentStock) {
+              alert(`Only ${currentStock} items available in stock!`);
+              return;
+            }
+
             if (existing) {
               existing.quantity += 1;
             } else {

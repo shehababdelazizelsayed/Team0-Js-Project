@@ -473,8 +473,11 @@
       <div class="form-row"><label>Title</label><input class="fld-title" value="${escapeHtml(
         data.title || ""
       )}"></div>
-      <div class="form-row"><label>Price</label><input class="fld-price" value="${escapeHtml(
+      <div class="form-row"><label>Price</label><input class="fld-price" type="number" step="0.01" value="${escapeHtml(
         data.price || ""
+      )}"></div>
+      <div class="form-row"><label>Stock Quantity</label><input class="fld-stockQuantity" type="number" min="0" step="1" value="${escapeHtml(
+        data.stockQuantity || ""
       )}"></div>
       <div class="form-row"><label>Description</label><textarea class="fld-desc">${escapeHtml(
         data.description || ""
@@ -489,11 +492,12 @@
             .getElementById("saveProductBtn")
             .addEventListener("click", async () => {
               const title = form.querySelector(".fld-title").value;
-              const price = form.querySelector(".fld-price").value;
+              const price = parseFloat(form.querySelector(".fld-price").value) || 0;
+              const stockQuantity = parseInt(form.querySelector(".fld-stockQuantity").value) || 0;
               const description = form.querySelector(".fld-desc").value;
               await setDoc(
                 pref,
-                { title, price, description },
+                { title, price, stockQuantity, description },
                 { merge: true }
               );
               hideModal();
@@ -530,6 +534,7 @@
           ["Brand", "brand"],
           ["Category", "cate"],
           ["Image", "image"],
+          ["Stock Quantity", "stockQuantity"],
           ["In Stock (flag)", "instack"],
           ["Model", "model"],
           ["Price", "price"],
@@ -539,8 +544,8 @@
           r.className = "form-row";
           if (key === "instack") {
             r.innerHTML = `<label>${label}</label><select class="fld-${key}"><option value="true">true</option><option value="false">false</option></select>`;
-          } else if (key === "price") {
-            r.innerHTML = `<label>${label}</label><input class="fld-${key}" type="number" step="0.01">`;
+          } else if (key === "price" || key === "stockQuantity") {
+            r.innerHTML = `<label>${label}</label><input class="fld-${key}" type="number" min="0" step="1">`;
           } else {
             r.innerHTML = `<label>${label}</label><input class="fld-${key}">`;
           }
@@ -570,7 +575,7 @@
               if (!el) return;
               let val = el.value;
               if (key === "instack") val = val === "true";
-              if (key === "price") val = val === "" ? null : Number(val);
+              if (key === "price" || key === "stockQuantity") val = val === "" ? null : Number(val);
               if (val !== null && val !== undefined && val !== "")
                 payload[key] = val;
             });

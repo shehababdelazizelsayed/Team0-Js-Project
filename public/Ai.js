@@ -55,7 +55,7 @@ async function loadProducts() {
         description: data.description || "",
         category: data.cate || data.category || "general",
         brand: data.brand || "",
-        stock: parseInt(data.stock || 0),
+        stockQuantity: parseInt(data.stockQuantity || data.stock || 0),
         ...data,
       });
     });
