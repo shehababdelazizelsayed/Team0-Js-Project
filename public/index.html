@@ -348,8 +348,7 @@
 
     <script src="topbar_js.js"></script>
     <script src="index.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+    
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
       import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
@@ -425,17 +424,54 @@
             userCart = userSnap.data().cart;
           }
 
-          const existingItem = userCart.find((item) => item.id === product.id);
-          if (existingItem) {
-            existingItem.quantity += 1;
-          } else {
-            userCart.push(product);
+          // Merge with localStorage cart so both stay consistent
+          const localCart = getCart();
+          const idToItem = new Map();
+          for (const it of userCart) idToItem.set(it.id, { ...it });
+          for (const it of localCart) {
+            if (idToItem.has(it.id)) {
+              const merged = idToItem.get(it.id);
+              merged.quantity = (merged.quantity || 0) + (it.quantity || 0);
+              idToItem.set(it.id, merged);
+            } else {
+              idToItem.set(it.id, { ...it });
+            }
           }
+          const existingItem = idToItem.get(product.id);
+          if (existingItem) existingItem.quantity = (existingItem.quantity || 0) + 1;
+          else idToItem.set(product.id, { ...product });
+          userCart = Array.from(idToItem.values());
 
           await setDoc(userRef, { cart: userCart }, { merge: true });
           console.log("✅ Cart updated in Firestore!");
         } catch (err) {
           console.error("❌ Error saving cart to Firestore:", err);
+        }
+      }
+
+      // Ensure Firestore has local cart after login
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          const localCart = getCart();
+          if (localCart.length > 0) {
+            const userRef = doc(db, "users", user.uid);
+            const snap = await getDoc(userRef);
+            const remote = snap.exists() && snap.data().cart ? snap.data().cart : [];
+            if (remote.length === 0) {
+              await setDoc(userRef, { cart: localCart }, { merge: true });
+            }
+          }
+        }
+      });
+
+      // ---------------- STOCK CHECK (no reservation during shopping) ----------------
+      async function fetchCurrentStock(productId) {
+        try {
+          const snap = await getDoc(doc(db, "products", productId));
+          if (!snap.exists()) return 0;
+          return snap.data().stockQuantity || 0;
+        } catch (e) {
+          return 0;
         }
       }
 
@@ -473,7 +509,7 @@
       } EGP</div>
       <div class="stock-status">${
         (product.stockQuantity || 0) > 0 
-          ? `<span class="in-stock">In Stock (${product.stockQuantity})</span>` 
+          ? `<span class="in-stock">In Stock</span>` 
           : '<span class="out-of-stock">Out of Stock</span>'
       }</div>
       <div class="actions-row">
@@ -490,26 +526,33 @@
 
         // --- ADD TO CART BUTTON ---
         const addBtn = card.querySelector(".cli-addcart");
+        const stockSpan = card.querySelector(".stock-status .in-stock");
         addBtn.addEventListener("click", async () => {
-          // Check stock availability
-          const currentStock = product.stockQuantity || 0;
-          if (currentStock <= 0) {
+          // Enforce per-user cap of 10
+          let cart = getCart();
+          const existing = cart.find((item) => item.id === product.id);
+          const currentCartQuantity = existing ? existing.quantity : 0;
+          if (currentCartQuantity >= 10) {
+            alert("You can only buy up to 10 units of this product.");
+            return;
+          }
+
+          // Check live stock from Firestore (no deduction yet)
+          const liveStock = await fetchCurrentStock(product.id);
+          if (liveStock <= 0) {
             alert("This product is out of stock!");
             return;
           }
-
-          let cart = getCart();
-          const existing = cart.find((item) => item.id === product.id);
-          
-          // Check if adding this item would exceed stock
-          const currentCartQuantity = existing ? existing.quantity : 0;
-          if (currentCartQuantity >= currentStock) {
-            alert(`Only ${currentStock} items available in stock!`);
+          const maxAllowed = Math.min(liveStock, 10);
+          if (currentCartQuantity >= maxAllowed) {
+            alert(`Only ${maxAllowed} items available for this product!`);
             return;
           }
 
+          // Update local cart (no stock change in DB yet)
           if (existing) {
             existing.quantity += 1;
+            existing.maxStock = maxAllowed;
           } else {
             cart.push({
               id: product.id,
@@ -518,18 +561,19 @@
               price: product.price || 0,
               image: product.image || "./Assets/1.jpg",
               quantity: 1,
+              maxStock: maxAllowed,
             });
           }
-
-          updateCart(cart); // update localStorage
-          await syncCartToFirestore({
-            id: product.id,
-            name: product.Name || product.name,
-            brand: product.brand || "",
-            price: product.price || 0,
-            image: product.image || "./Assets/1.jpg",
-            quantity: 1,
-          });
+          updateCart(cart);
+          // Write entire local cart to Firestore (source of truth) to avoid double increments
+          if (currentUser) {
+            try {
+              const userRef = doc(db, "users", currentUser.uid);
+              await setDoc(userRef, { cart }, { merge: true });
+            } catch (e) {
+              console.warn("Failed to sync full cart to Firestore", e);
+            }
+          }
 
           console.log(`${product.Name || product.name} added to cart`);
         });

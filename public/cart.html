@@ -231,10 +231,9 @@
 
       <div class="Copywrite">&copy; 2025 Team 0. All rights reserved.</div>
     </div>
-    <script src="./cart.js"></script>
+    
     <script src="./topbar_js.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+    
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
       import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
@@ -307,14 +306,24 @@
       // 🔹 Cart Helpers
       // --------------------------
       async function getCart() {
-        if (window.currentUser) {
-          const userRef = doc(db, "users", window.currentUser.uid);
-          const snap = await getDoc(userRef);
-          if (snap.exists() && snap.data().cart) {
-            return snap.data().cart;
-          }
+        const local = JSON.parse(localStorage.getItem("cart")) || [];
+        if (!window.currentUser) return local;
+
+        const userRef = doc(db, "users", window.currentUser.uid);
+        const snap = await getDoc(userRef);
+        const remote = snap.exists() && Array.isArray(snap.data().cart) ? snap.data().cart : [];
+
+        // Prefer remote when available; otherwise seed remote from local
+        if (remote.length > 0) {
+          // keep local in sync with remote
+          localStorage.setItem("cart", JSON.stringify(remote));
+          return remote;
         }
-        return JSON.parse(localStorage.getItem("cart")) || [];
+        if (local.length > 0) {
+          await setDoc(userRef, { cart: local }, { merge: true });
+          return local;
+        }
+        return [];
       }
 
       async function saveCart(cart) {
@@ -325,17 +334,55 @@
         localStorage.setItem("cart", JSON.stringify(cart));
       }
 
+      // --------------------------
+      // 🔹 Stock Helpers (Check only; deduct on order confirmation)
+      // --------------------------
+      function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+      async function getLiveStock(productId) {
+        try {
+          const snap = await getDoc(doc(db, "products", productId));
+          if (!snap.exists()) return 0;
+          return snap.data().stockQuantity || 0;
+        } catch (e) {
+          return 0;
+        }
+      }
+
       async function renderCart() {
         const cart = await getCart();
         const tbody = document.getElementById("cartTableBody");
         tbody.innerHTML = "";
         let fullTotal = 0;
 
-        cart.forEach((item, index) => {
+        if (!cart || cart.length === 0) {
+          const emptyRow = document.createElement("tr");
+          emptyRow.innerHTML = `<td colspan="6" style="text-align:center">Your cart is empty.</td>`;
+          tbody.appendChild(emptyRow);
+          const totalBox = document.querySelector(".checkout-box");
+          if (totalBox) {
+            totalBox.querySelector("p span").textContent = `0 EGP`;
+            totalBox.querySelector("strong span").textContent = `0 EGP`;
+            localStorage.setItem("finalTotal", 0);
+          }
+          if (typeof updateCartCount === "function") {
+            updateCartCount();
+          }
+          return;
+        }
+
+        for (const [index, item] of cart.entries()) {
           const totalPrice = item.price * item.quantity;
           fullTotal += totalPrice;
 
+          const liveStock = await getLiveStock(item.id);
+          const maxAllowed = Math.min(liveStock, 10);
+
           const row = document.createElement("tr");
+          row.setAttribute("data-product-id", item.id);
+          row.setAttribute("data-max-allowed", String(maxAllowed));
+          const disableIncrease = item.quantity >= maxAllowed ? 'disabled' : '';
+          const limitNote = item.quantity >= maxAllowed ? `<small style="color:#a00;display:block;margin-top:4px">Limit reached</small>` : '';
           row.innerHTML = `
         <td><img src="${item.image}" alt="${item.name}" width="60"/></td>
         <td>${item.name}</td>
@@ -344,43 +391,17 @@
           <div class="quantity-control">
             <button class="decrease">-</button>
             <input type="text" value="${item.quantity}" readonly />
-            <button class="increase">+</button>
+            <button class="increase" ${disableIncrease}>+</button>
             <button class="delete-btn">Delete</button>
+            ${limitNote}
           </div>
         </td>
         <td>${item.price} EGP</td>
         <td>${totalPrice} EGP</td>
       `;
 
-          // Decrease qty
-          row.querySelector(".decrease").addEventListener("click", async () => {
-            if (item.quantity > 1) {
-              item.quantity--;
-            } else {
-              cart.splice(index, 1);
-            }
-            await saveCart(cart);
-            renderCart();
-          });
-
-          // Increase qty
-          row.querySelector(".increase").addEventListener("click", async () => {
-            item.quantity++;
-            await saveCart(cart);
-            renderCart();
-          });
-
-          // Delete item
-          row
-            .querySelector(".delete-btn")
-            .addEventListener("click", async () => {
-              cart.splice(index, 1);
-              await saveCart(cart);
-              renderCart();
-            });
-
           tbody.appendChild(row);
-        });
+        }
 
         // Update totals
         const totalBox = document.querySelector(".checkout-box");
@@ -405,8 +426,10 @@
         window.currentUser = user;
         updateProfileDropdown(user);
 
-        // 🔥 Reload cart when login/logout changes
-        renderCart();
+        // 🔥 On login/logout, load merged cart and render
+        (async () => {
+          await renderCart();
+        })();
 
         const checkoutBtn = document.querySelector(".checkout-btn");
         if (checkoutBtn) {
@@ -461,6 +484,67 @@
 
         // Render cart on page load
         renderCart();
+        
+        // Delegated handlers to keep buttons working after re-render
+        const tbody = document.getElementById("cartTableBody");
+        tbody.addEventListener("click", async (e) => {
+          const target = e.target;
+          if (!(target instanceof Element)) return;
+          const row = target.closest("tr");
+          if (!row) return;
+          if (row.getAttribute("data-busy") === "1") return; // prevent double actions
+          const productId = row.getAttribute("data-product-id");
+          if (!productId) return;
+
+          let cart = await getCart();
+          const idx = cart.findIndex((it) => it.id === productId);
+          if (idx === -1) return;
+          const item = cart[idx];
+
+          if (target.classList.contains("decrease")) {
+            row.setAttribute("data-busy", "1");
+            if (item.quantity > 1) {
+              item.quantity -= 1;
+            } else {
+              cart.splice(idx, 1);
+            }
+            await saveCart(cart);
+            await renderCart();
+            row.removeAttribute("data-busy");
+            return;
+          }
+
+          if (target.classList.contains("increase")) {
+            row.setAttribute("data-busy", "1");
+            if (item.quantity >= 10) {
+              alert("You can only buy up to 10 units of this product.");
+              row.removeAttribute("data-busy");
+              return;
+            }
+            const liveStock = await getLiveStock(item.id);
+            const maxAllowed = Math.min(liveStock, 10);
+            if (item.quantity >= maxAllowed) {
+              alert(`Only ${maxAllowed} items available for this product!`);
+              row.removeAttribute("data-busy");
+              return;
+            }
+            item.maxStock = maxAllowed;
+            item.quantity += 1;
+            await saveCart(cart);
+            await renderCart();
+            row.removeAttribute("data-busy");
+            return;
+          }
+
+          if (target.classList.contains("delete-btn")) {
+            row.setAttribute("data-busy", "1");
+            cart.splice(idx, 1);
+            await saveCart(cart);
+            await renderCart();
+            row.removeAttribute("data-busy");
+            return;
+          }
+        });
       });
     </script>
 

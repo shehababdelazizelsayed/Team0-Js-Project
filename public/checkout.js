@@ -95,6 +95,51 @@ async function validateStockAvailability() {
 }
 
 // ===================== payment =====================
+async function finalizeOrderAndDeductStock(paymentMethod) {
+  const cart = getCart();
+  if (!cart || cart.length === 0) return { ok: true };
+
+  try {
+    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+    const { getFirestore, doc, runTransaction } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD9ghRnC-TMJ-TV6TJxdGH_7qgRsT6Po04",
+      authDomain: "project-d6110.firebaseapp.com",
+      projectId: "project-d6110",
+      storageBucket: "project-d6110.firebasestorage.app",
+      messagingSenderId: "402041654228",
+      appId: "1:402041654228:web:2430f53e2afb775e242441",
+      measurementId: "G-0ZLPYLVJ4Y",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Single transaction to update all product stocks atomically
+    await runTransaction(db, async (tx) => {
+      for (const item of cart) {
+        const ref = doc(db, "products", item.id);
+        const snap = await tx.get(ref);
+        if (!snap.exists()) throw new Error("Product not found: " + item.name);
+        const data = snap.data();
+        const available = data.stockQuantity || 0;
+        if (available < item.quantity) {
+          throw new Error(`Insufficient stock for ${item.name}. Available: ${available}, requested: ${item.quantity}`);
+        }
+        tx.update(ref, { stockQuantity: available - item.quantity });
+      }
+    });
+
+    // Clear local cart after successful stock deduction
+    localStorage.removeItem("cart");
+    localStorage.removeItem("finalTotal");
+    return { ok: true };
+  } catch (e) {
+    console.error("Error finalizing order:", e);
+    return { ok: false, error: e?.message || "Failed to place order" };
+  }
+}
 const confirmBtn = document.querySelector(".confirm-btn");
 if (confirmBtn) {
   confirmBtn.addEventListener("click", async () => {
@@ -115,7 +160,12 @@ if (confirmBtn) {
     ).value;
 
     if (method === "cod") {
-      alert("Order placed with Cash on Delivery!");
+      const res = await finalizeOrderAndDeductStock("cod");
+      if (!res.ok) {
+        alert(res.error || "Failed to place order. Please try again.");
+        return;
+      }
+      window.location.href = "success.html";
       return;
     }
 
@@ -139,7 +189,12 @@ if (confirmBtn) {
               ],
             });
           },
-          onApprove: function (data, actions) {
+          onApprove: async function (data, actions) {
+            const res = await finalizeOrderAndDeductStock("card");
+            if (!res.ok) {
+              alert(res.error || "Payment captured but order failed. Contact support.");
+              return;
+            }
             window.location.href = "success.html";
           },
           onCancel: function () {
