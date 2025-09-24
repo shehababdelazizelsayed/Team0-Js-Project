@@ -389,10 +389,10 @@
         <td>${item.brand || "-"}</td>
         <td>
           <div class="quantity-control">
-            <button class="decrease">-</button>
+            <button type="button" class="decrease">-</button>
             <input type="text" value="${item.quantity}" readonly />
-            <button class="increase" ${disableIncrease}>+</button>
-            <button class="delete-btn">Delete</button>
+            <button type="button" class="increase" ${disableIncrease}>+</button>
+            <button type="button" class="delete-btn">Delete</button>
             ${limitNote}
           </div>
         </td>
@@ -416,6 +416,54 @@
         // Update cart icon count
         if (typeof updateCartCount === "function") {
           updateCartCount();
+        }
+      }
+
+      // Efficient UI update helpers (avoid full table re-render)
+      function computeFullTotal(cart) {
+        return cart.reduce((sum, it) => sum + (it.price * it.quantity), 0);
+      }
+
+      function updateTotalsUI(cart) {
+        const fullTotal = computeFullTotal(cart);
+        const totalBox = document.querySelector(".checkout-box");
+        if (totalBox) {
+          totalBox.querySelector("p span").textContent = `${fullTotal} EGP`;
+          totalBox.querySelector("strong span").textContent = `${fullTotal} EGP`;
+        }
+        localStorage.setItem("finalTotal", fullTotal);
+        if (typeof updateCartCount === "function") updateCartCount();
+      }
+
+      function updateRowUI(row, item, maxAllowed) {
+        // quantity input
+        const qtyInput = row.querySelector(".quantity-control input");
+        if (qtyInput) qtyInput.value = String(item.quantity);
+        // total price cell (last td)
+        const tds = row.querySelectorAll("td");
+        const totalCell = tds[tds.length - 1];
+        if (totalCell) totalCell.textContent = `${item.price * item.quantity} EGP`;
+        // increase button state and note
+        const incBtn = row.querySelector(".increase");
+        const container = row.querySelector(".quantity-control");
+        if (incBtn) {
+          if (item.quantity >= maxAllowed) incBtn.setAttribute("disabled", "");
+          else incBtn.removeAttribute("disabled");
+        }
+        if (container) {
+          let note = container.querySelector("small");
+          if (item.quantity >= maxAllowed) {
+            if (!note) {
+              note = document.createElement("small");
+              note.style.color = "#a00";
+              note.style.display = "block";
+              note.style.marginTop = "4px";
+              container.appendChild(note);
+            }
+            note.textContent = "Limit reached";
+          } else if (note) {
+            note.remove();
+          }
         }
       }
 
@@ -488,6 +536,7 @@
         // Delegated handlers to keep buttons working after re-render
         const tbody = document.getElementById("cartTableBody");
         tbody.addEventListener("click", async (e) => {
+          e.preventDefault();
           const target = e.target;
           if (!(target instanceof Element)) return;
           const row = target.closest("tr");
@@ -507,9 +556,21 @@
               item.quantity -= 1;
             } else {
               cart.splice(idx, 1);
+              // remove row immediately if deleted
+              row.remove();
             }
             await saveCart(cart);
-            await renderCart();
+            updateTotalsUI(cart);
+            if (cart[idx]) {
+              const liveStock = await getLiveStock(item.id);
+              const maxAllowed = Math.min(liveStock, 10);
+              updateRowUI(row, cart[idx], maxAllowed);
+            } else if (cart.length === 0) {
+              // add empty row if no items remain
+              const emptyRow = document.createElement("tr");
+              emptyRow.innerHTML = `<td colspan="6" style="text-align:center">Your cart is empty.</td>`;
+              tbody.appendChild(emptyRow);
+            }
             row.removeAttribute("data-busy");
             return;
           }
@@ -531,7 +592,8 @@
             item.maxStock = maxAllowed;
             item.quantity += 1;
             await saveCart(cart);
-            await renderCart();
+            updateRowUI(row, item, maxAllowed);
+            updateTotalsUI(cart);
             row.removeAttribute("data-busy");
             return;
           }
@@ -540,7 +602,13 @@
             row.setAttribute("data-busy", "1");
             cart.splice(idx, 1);
             await saveCart(cart);
-            await renderCart();
+            row.remove();
+            updateTotalsUI(cart);
+            if (cart.length === 0) {
+              const emptyRow = document.createElement("tr");
+              emptyRow.innerHTML = `<td colspan="6" style="text-align:center">Your cart is empty.</td>`;
+              tbody.appendChild(emptyRow);
+            }
             row.removeAttribute("data-busy");
             return;
           }
